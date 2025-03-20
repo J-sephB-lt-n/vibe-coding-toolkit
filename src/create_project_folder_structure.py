@@ -29,7 +29,7 @@ if __name__ == "__main__":
     print("The following files and folders will be created:\n")
     print(filetree_string(filepaths))
     print()
-    confirm: bool = input("Please confirm creation (anything other than 'yes' will abort): ") == "yes"
+    confirm: str = input("Please confirm creation (anything other than 'yes' will abort): ")
     if confirm != "yes":
         print("process aborted")
         exit()
