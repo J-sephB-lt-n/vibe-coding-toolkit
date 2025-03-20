@@ -1,26 +1,9 @@
 
 import argparse
 import json
-from collections import defaultdict
 from pathlib import Path
 
-def build_filetree(paths: list[Path]) -> defaultdict:
-    tree = defaultdict(dict)
-    
-    for path in paths:
-        parts = path.parts
-        node = tree
-        for part in parts[:-1]:  # Traverse directories
-            node = node.setdefault(part, {})
-        node[parts[-1]] = None  # Mark file nodes with None
-    
-    return tree
-
-def print_tree(node, prefix=""):
-    for key, sub_node in sorted(node.items()):
-        print(prefix + "├── " + key)
-        if isinstance(sub_node, dict):
-            print_tree(sub_node, prefix + "│   ")
+from src.filepaths import filetree_string
 
 if __name__ == "__main__":
     arg_parser=argparse.ArgumentParser()
@@ -39,14 +22,22 @@ if __name__ == "__main__":
     args = arg_parser.parse_args()
 
     with open(args.input_filepaths_list, "r") as file:
-        filepaths: list[Path] = [Path(x) for x in json.load(file)]
+        filepaths: list[Path] = [args.output_dir / Path(x) for x in json.load(file)]
 
     assert isinstance(filepaths, list)
 
     print("The following files and folders will be created:\n")
-    file_tree = build_filetree(filepaths)
-    print_tree(file_tree)
+    print(filetree_string(filepaths))
     print()
     confirm: bool = input("Please confirm creation (anything other than 'yes' will abort): ") == "yes"
     if confirm != "yes":
+        print("process aborted")
         exit()
+
+    for path in filepaths:
+        if path.suffix: # assume is a file
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.touch(exist_ok=True)
+        else: # assume is a directory
+            path.mkdir(parents=True, exist_ok=True)
+    print("finished")
