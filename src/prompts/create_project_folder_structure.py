@@ -43,6 +43,6 @@ if __name__ == "__main__":
         requirements_spec: str = file.read()
     print(
         prompt.render(
-            software_requirements_spec=requirements_spec
-        )
+            software_requirements_spec=requirements_spec,
+        ),
     )
