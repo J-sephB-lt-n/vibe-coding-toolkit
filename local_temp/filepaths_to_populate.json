@@ -1,0 +1,11 @@
+[
+    "virus_simulation/app/__init__.py",
+    "virus_simulation/app/main.py",
+    "virus_simulation/app/config.py",
+    "virus_simulation/app/simulation.py",
+    "virus_simulation/app/state.py",
+    "virus_simulation/app/ui.py",
+    "virus_simulation/assets/styles.css",
+    "virus_simulation/requirements.txt",
+    "virus_simulation/run.sh"
+]
