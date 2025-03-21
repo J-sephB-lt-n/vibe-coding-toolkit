@@ -36,3 +36,5 @@ Populate files with code provided by LLM:
 uv run python -m src.populate_files \
   --input_file_contents 'local_temp/files_contents.md'
 ```
+
+Now, you can go run your app. READ ALL OF THE CODE FIRST - there might be some odious security vulnerabilities in there.
