@@ -22,5 +22,17 @@ I dumped the JSON list of filepaths to create in [local_temp/project_folder_stru
 ```bash
 uv run python -m src.create_project_folder_structure \
   --input_filepaths_list 'local_temp/project_folder_structure.json' \
-  --output_dir 'local_temp'
+```
+
+I put the paths to all of the files which I want the LLM to provide code for in [local_temp/filepaths_to_populate.json](./local_temp/filepaths_to_populate.json), then run:
+
+```bash
+uv run python -m src.prompts.populate_files \
+  --input_filepaths_list 'local_temp/filepaths_to_populate.json'
+```
+
+Populate files with code provided by LLM:
+```bash
+uv run python -m src.populate_files \
+  --input_file_contents 'local_temp/files_contents.md'
 ```
