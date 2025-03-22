@@ -1,5 +1,3 @@
-
-
 <project-scope>
 List the objectives and benefits of the project here.
 Describe what it is, and what it is not.
