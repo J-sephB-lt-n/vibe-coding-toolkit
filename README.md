@@ -7,17 +7,18 @@ However, I do find the one-time creation of POC web apps very powerful, and I'm 
 
 ## Example workflow
 
-1. Make a copy of [templates/software_requirements_spec.md](./templates/software_requirements_spec.md), saving it to [local_temp/software_requirements_spec.md](./local_temp/software_requirements_spec.md), and fill it in.
-
-2. 
+Make a copy of [templates/software_requirements_spec.md](./templates/software_requirements_spec.md), saving it to [local_temp/software_requirements_spec.md](./local_temp/software_requirements_spec.md), and fill it in.
 
 ```bash
-uv run python -m src.prompts.create_project_folder_structure \
+uv run python -m src.prompts.discuss_requirements_spec \
   --requirements_doc 'local_temp/software_requirements_spec.md'
 ```
 
-I dumped the JSON list of filepaths to create in [local_temp/project_folder_structure.json](./local_temp/project_folder_structure.json)
+```bash
+uv run python -m src.prompts.create_project_folder_structure
+```
 
+I dumped the JSON list of filepaths to create in [local_temp/project_folder_structure.json](./local_temp/project_folder_structure.json)
 
 ```bash
 uv run python -m src.create_project_folder_structure \
