@@ -9,7 +9,7 @@ The intended users of this app are the general public (people with no prior expo
 <user-interface-requirements>
 The simulation consists of dots which move around randomly within a bounded box on a single page web page. Each dot represents an individual in the simulated population.
 At any given time, an individual can be healthy, sick or recovered.
-The state of an individual is represented by their colour: healthy=green, sick=red, recovered=black.
+The state of an individual is represented by their colour: healthy=green, sick=red, recovered=grey.
 Individuals infect each other (with an infectiousness probability) when the dots representing them overlap.
 
 The following controls are available to the user:
@@ -23,6 +23,7 @@ The following controls are available to the user:
 - Integer: Infectiousness (probability of infection when 2 individuals touch - a value between 0 and 1)
 
 Set each initial parameter with a reasonable default.
+Next to each control, add a hover tooltip explaining what the control means (in terms of epidemiology), and how it affects the simulation.
 Include a clear legend indicating to the user what the colours of the individuals in the simulation mean.
 </user-interface-requirements>
 
@@ -40,6 +41,7 @@ It must work in any modern browser.
 - User can pause and resume the current simulation
 - User can control the speed of the simulation (frame rate)
 - User can set the population size in the simulation
+- User can set the number of infected individuals at the start of the simulation
 - User can control the infection length (how long individuals in the simulation are sick for)
 - User can control the infectiousness of the virus in the simulation (how likely it is that the virus is transmitted on contact)
 </functional-requirements>
