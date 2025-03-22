@@ -1,196 +1,275 @@
-/virus_simulation/app/__init__.py
-```python
-from flask import Flask
-from .config import Config
-from .simulation import Simulation
-from .ui import create_ui
+Below is the complete production-quality content for each of the requested files, organized neatly according to your specification:
 
-def create_app():
-    """Factory function to create and configure the Flask application."""
-    app = Flask(__name__)
-    app.config.from_object(Config)
+---
 
-    # Initialize simulation
-    app.simulation = Simulation()
+simulation-webapp/public/index.html
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Virus Spread Simulation</title>
+  <link rel="stylesheet" href="../src/css/style.css">
+  <link rel="stylesheet" href="../src/css/controls.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Virus Spread Simulation</h1>
+    <canvas id="simulationCanvas"></canvas>
+    <div class="controls">
+      <button id="startBtn">Start Simulation</button>
+      <button id="pauseBtn">Pause Simulation</button>
+      <button id="resetBtn">New Simulation</button>
 
-    # Register UI components
-    create_ui(app)
-
-    return app
+      <label>Simulation Speed (FPS): <input id="speed" type="number" value="30" min="1" max="120"></label>
+      <label>Population Size: <input id="population" type="number" value="100" min="10" max="1000"></label>
+      <label>Infection Duration (frames): <input id="infectionDuration" type="number" value="200" min="1"></label>
+      <label>Infectiousness (0-1): <input id="infectiousness" type="number" step="0.01" value="0.5" min="0" max="1"></label>
+    </div>
+  </div>
+  
+  <script src="../src/js/simulation.js"></script>
+  <script src="../src/js/controls.js"></script>
+  <script src="../src/js/main.js"></script>
+</body>
+</html>
 ```
 
-/virus_simulation/app/main.py
-```python
-from . import create_app
+---
 
-app = create_app()
+simulation-webapp/src/js/main.js
+```javascript
+document.addEventListener('DOMContentLoaded', () => {
+  const canvas = document.getElementById('simulationCanvas');
+  const simulation = new Simulation(canvas);
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+  setupControls(simulation);
+  simulation.initialize();
+});
 ```
 
-/virus_simulation/app/config.py
-```python
-import os
+---
 
-class Config:
-    """Configuration settings for the application."""
-    
-    SECRET_KEY = os.getenv("SECRET_KEY", "supersecretkey")
-    SIMULATION_SPEED = int(os.getenv("SIMULATION_SPEED", 1))
-    POPULATION_SIZE = int(os.getenv("POPULATION_SIZE", 100))
-    INFECTION_RATE = float(os.getenv("INFECTION_RATE", 0.1))
-    RECOVERY_RATE = float(os.getenv("RECOVERY_RATE", 0.05))
-    INITIAL_INFECTED = int(os.getenv("INITIAL_INFECTED", 1))
+simulation-webapp/src/js/simulation.js
+```javascript
+class Individual {
+  constructor(x, y, status = 'healthy') {
+    this.x = x;
+    this.y = y;
+    this.status = status; // healthy, sick, recovered
+    this.infectedFrames = 0;
+    this.vx = Math.random() * 2 - 1;
+    this.vy = Math.random() * 2 - 1;
+  }
+
+  update(bounds, infectionDuration) {
+    this.x += this.vx;
+    this.y += this.vy;
+
+    if (this.x <= 0 || this.x >= bounds.width) this.vx *= -1;
+    if (this.y <= 0 || this.y >= bounds.height) this.vy *= -1;
+
+    if (this.status === 'sick') {
+      this.infectedFrames++;
+      if (this.infectedFrames >= infectionDuration) {
+        this.status = 'recovered';
+      }
+    }
+  }
+}
+
+class Simulation {
+  constructor(canvas) {
+    this.canvas = canvas;
+    this.ctx = canvas.getContext('2d');
+    this.individuals = [];
+    this.animationFrameId = null;
+    this.isRunning = false;
+
+    // Default settings
+    this.settings = {
+      population: 100,
+      speed: 30,
+      infectionDuration: 200,
+      infectiousness: 0.5,
+    };
+
+    this.resizeCanvas();
+    window.addEventListener('resize', () => this.resizeCanvas());
+  }
+
+  resizeCanvas() {
+    this.canvas.width = 600;
+    this.canvas.height = 400;
+  }
+
+  initialize() {
+    this.stop();
+    this.individuals = [];
+    for (let i = 0; i < this.settings.population; i++) {
+      this.individuals.push(new Individual(
+        Math.random() * this.canvas.width,
+        Math.random() * this.canvas.height
+      ));
+    }
+    // Infect one individual initially
+    this.individuals[0].status = 'sick';
+    this.draw();
+  }
+
+  start() {
+    if (this.isRunning) return;
+    this.isRunning = true;
+    this.run();
+  }
+
+  stop() {
+    this.isRunning = false;
+    if (this.animationFrameId) cancelAnimationFrame(this.animationFrameId);
+  }
+
+  run() {
+    const fpsInterval = 1000 / this.settings.speed;
+    let then = Date.now();
+
+    const animate = () => {
+      this.animationFrameId = requestAnimationFrame(animate);
+      const now = Date.now();
+      const elapsed = now - then;
+      if (elapsed > fpsInterval) {
+        then = now - (elapsed % fpsInterval);
+        this.update();
+        this.draw();
+      }
+    };
+    animate();
+  }
+
+  update() {
+    this.individuals.forEach(individual => individual.update(this.canvas, this.settings.infectionDuration));
+    // Check for infections
+    for (let i = 0; i < this.individuals.length; i++) {
+      for (let j = i + 1; j < this.individuals.length; j++) {
+        this.checkInfection(this.individuals[i], this.individuals[j]);
+      }
+    }
+  }
+
+  checkInfection(indiv1, indiv2) {
+    if ((indiv1.status === 'sick' && indiv2.status === 'healthy') ||
+        (indiv2.status === 'sick' && indiv1.status === 'healthy')) {
+      const dx = indiv1.x - indiv2.x;
+      const dy = indiv1.y - indiv2.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      if (distance < 5 && Math.random() < this.settings.infectiousness) {
+        if (indiv1.status === 'healthy') indiv1.status = 'sick';
+        if (indiv2.status === 'healthy') indiv2.status = 'sick';
+      }
+    }
+  }
+
+  draw() {
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.individuals.forEach(indiv => {
+      this.ctx.fillStyle = indiv.status === 'healthy' ? 'green' : indiv.status === 'sick' ? 'red' : 'black';
+      this.ctx.beginPath();
+      this.ctx.arc(indiv.x, indiv.y, 3, 0, 2 * Math.PI);
+      this.ctx.fill();
+    });
+  }
+}
 ```
 
-/virus_simulation/app/simulation.py
-```python
-import random
-from .state import Person, SimulationState
+---
 
-class Simulation:
-    """Class to manage the virus simulation logic."""
+simulation-webapp/src/js/controls.js
+```javascript
+function setupControls(simulation) {
+  document.getElementById('startBtn').addEventListener('click', () => simulation.start());
+  document.getElementById('pauseBtn').addEventListener('click', () => simulation.stop());
+  document.getElementById('resetBtn').addEventListener('click', () => simulation.initialize());
 
-    def __init__(self, population_size=100, infection_rate=0.1, recovery_rate=0.05, initial_infected=1):
-        self.population_size = population_size
-        self.infection_rate = infection_rate
-        self.recovery_rate = recovery_rate
-        self.state = SimulationState(population_size, initial_infected)
+  document.getElementById('speed').addEventListener('change', (e) => {
+    simulation.settings.speed = parseInt(e.target.value) || 30;
+  });
 
-    def step(self):
-        """Advance the simulation by one step."""
-        for person in self.state.population:
-            if person.infected:
-                if random.random() < self.recovery_rate:
-                    person.recover()
-                else:
-                    for other in self.state.population:
-                        if not other.infected and random.random() < self.infection_rate:
-                            other.infect()
+  document.getElementById('population').addEventListener('change', (e) => {
+    simulation.settings.population = parseInt(e.target.value) || 100;
+    simulation.initialize();
+  });
 
-    def get_state(self):
-        """Return the current state of the simulation."""
-        return self.state.get_summary()
+  document.getElementById('infectionDuration').addEventListener('change', (e) => {
+    simulation.settings.infectionDuration = parseInt(e.target.value) || 200;
+  });
+
+  document.getElementById('infectiousness').addEventListener('change', (e) => {
+    simulation.settings.infectiousness = parseFloat(e.target.value) || 0.5;
+  });
+}
 ```
 
-/virus_simulation/app/state.py
-```python
-class Person:
-    """Represents an individual in the population."""
+---
 
-    def __init__(self, infected=False):
-        self.infected = infected
-        self.recovered = False
-
-    def infect(self):
-        """Mark the person as infected."""
-        if not self.recovered:
-            self.infected = True
-
-    def recover(self):
-        """Mark the person as recovered and immune."""
-        self.infected = False
-        self.recovered = True
-
-
-class SimulationState:
-    """Manages the population and their health states."""
-
-    def __init__(self, population_size, initial_infected):
-        self.population = [Person(infected=(i < initial_infected)) for i in range(population_size)]
-
-    def get_summary(self):
-        """Return the summary of the current simulation state."""
-        infected_count = sum(1 for person in self.population if person.infected)
-        recovered_count = sum(1 for person in self.population if person.recovered)
-        healthy_count = len(self.population) - infected_count - recovered_count
-        return {
-            "healthy": healthy_count,
-            "infected": infected_count,
-            "recovered": recovered_count
-        }
-```
-
-/virus_simulation/app/ui.py
-```python
-from flask import render_template, jsonify
-from .simulation import Simulation
-
-def create_ui(app):
-    """Register routes for the UI and API endpoints."""
-
-    @app.route("/")
-    def index():
-        """Render the main UI page."""
-        return render_template("index.html")
-
-    @app.route("/api/state")
-    def get_state():
-        """Return the current simulation state as JSON."""
-        return jsonify(app.simulation.get_state())
-
-    @app.route("/api/step", methods=["POST"])
-    def step():
-        """Advance the simulation by one step and return the updated state."""
-        app.simulation.step()
-        return jsonify(app.simulation.get_state())
-```
-
-/virus_simulation/assets/styles.css
+simulation-webapp/src/css/style.css
 ```css
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
-    margin: 0;
-    padding: 0;
+  font-family: Arial, sans-serif;
+  background-color: #f8f9fa;
+  margin: 0;
+  padding: 0;
 }
 
 .container {
-    max-width: 800px;
-    margin: auto;
-    padding: 20px;
-    background: white;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  width: 700px;
+  margin: auto;
+  padding: 20px;
+  text-align: center;
 }
 
-h1 {
-    text-align: center;
-    color: #333;
-}
-
-button {
-    display: block;
-    margin: 20px auto;
-    padding: 10px 20px;
-    font-size: 16px;
-    cursor: pointer;
-    background: #007bff;
-    color: white;
-    border: none;
-    border-radius: 5px;
-}
-
-button:hover {
-    background: #0056b3;
+#simulationCanvas {
+  border: 1px solid #ccc;
+  background-color: #ffffff;
+  margin-top: 10px;
 }
 ```
 
-/virus_simulation/requirements.txt
+---
+
+simulation-webapp/src/css/controls.css
+```css
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 15px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  margin-top: 15px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.controls button {
+  padding: 8px;
+  cursor: pointer;
+  border: none;
+  background-color: #007bff;
+  color: #fff;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.controls button:hover {
+  background-color: #0056b3;
+}
+
+.controls label {
+  font-size: 14px;
+}
+
+.controls input {
+  margin-left: 8px;
+  padding: 4px;
+  width: 80px;
+}
 ```
-Flask==2.3.2
-gunicorn==21.2.0
-```
-
-/virus_simulation/run.sh
-```sh
-#!/bin/bash
-
-export FLASK_APP=virus_simulation.app.main
-export FLASK_ENV=development
-
-flask run --host=0.0.0.0 --port=5000
-```
-
-This structure provides a well-organized, modern Flask-based simulation of virus spread with a simple API and UI. Let me know if you need enhancements! 🚀
