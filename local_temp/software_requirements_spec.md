@@ -48,4 +48,5 @@ It must work in any modern browser.
 
 <non-functional-requirements>
 The application should not use excessive CPU, RAM or storage on the user's computer.
+The app should work when I just open the index.html file on my local (no CORS errors please).
 </non-functional-requirements>

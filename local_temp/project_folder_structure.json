@@ -1,8 +1,0 @@
-[
-  "simulation-webapp/public/index.html",
-  "simulation-webapp/src/js/main.js",
-  "simulation-webapp/src/js/simulation.js",
-  "simulation-webapp/src/js/controls.js",
-  "simulation-webapp/src/css/style.css",
-  "simulation-webapp/src/css/controls.css"
-]
