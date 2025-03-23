@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virus Spread Simulation</title>
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="icon" href="assets/images/favicon.ico">
+</head>
+<body>
+    <div class="container">
+        <h1>Virus Spread Simulation</h1>
+        <div id="controls">
+            <button id="new-sim" title="Creates a new simulation with current parameters.">New Simulation</button>
+            <button id="start-sim" title="Starts or resumes the simulation.">Start Simulation</button>
+            <button id="pause-sim" title="Pauses the simulation.">Pause Simulation</button>
+
+            <label>Simulation speed (fps):
+                <input type="number" id="sim-speed" min="1" max="60" title="Number of simulation updates per second. Higher value = faster simulation.">
+            </label>
+
+            <label>Population size:
+                <input type="number" id="pop-size" min="10" max="500" title="Total number of individuals in the simulation.">
+            </label>
+
+            <label>Initially infected:
+                <input type="number" id="initial-infected" min="1" max="100" title="Number of individuals initially infected.">
+            </label>
+
+            <label>Infection length:
+                <input type="number" id="infection-length" min="10" max="500" title="Duration (frames) an individual remains infectious.">
+            </label>
+
+            <label>Infectiousness:
+                <input type="number" id="infectiousness" step="0.01" min="0" max="1" title="Probability of infection on contact. (0=no infection, 1=always infect)">
+            </label>
+        </div>
+        <canvas id="simulation-canvas" width="800" height="600"></canvas>
+        <div id="legend">
+            <span class="dot healthy"></span> Healthy
+            <span class="dot sick"></span> Sick
+            <span class="dot recovered"></span> Recovered
+        </div>
+    </div>
+    <script src="config/defaults.js"></script>
+    <script src="assets/js/simulation.js"></script>
+    <script src="assets/js/controls.js"></script>
+</body>
+</html>
